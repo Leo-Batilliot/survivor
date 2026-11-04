@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  tickettout-db:
+    image: postgres:17-alpine
+    container_name: tickettout-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-tickettout_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-tickettout_password}
+      POSTGRES_DB: ${DB_NAME:-tickettout_db}
+    ports:
+      - "5433:5432"
+    volumes:
+      - tickettout_pgdata:/var/lib/postgresql/data
+
+volumes:
+  tickettout_pgdata:
+    driver: local

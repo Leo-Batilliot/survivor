@@ -1,0 +1,71 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Salarie {
+  id           String        @id @default(uuid())
+  prenom       String
+  adresseMail  String        @unique @map("adresse_mail")
+  motDePasse   String        @map("mot_de_passe")
+  solde        Int           @default(0) // en centimes
+  transactions Transaction[]
+  createdAt    DateTime      @default(now()) @map("created_at")
+
+  @@map("salarie")
+}
+
+model Partenaire {
+  id            String              @id @default(uuid())
+  nom           String
+  adresseMail   String              @unique @map("adresse_mail")
+  motDePasse    String              @map("mot_de_passe")
+  adressePostal String              @map("adresse_postal")
+  numeroSiren   String              @map("numero_de_SIREN")
+  objetSocial   String              @map("objet_social")
+  statu         String              @default("PENDING")
+  transactions  Transaction[]
+  decisions     DecisionPartenaire[]
+
+  @@map("partenaires (public)")
+}
+
+model Transaction {
+  id               String     @id @default(uuid())
+  partenaireId     String     @map("partenaire_id")
+  salarieId        String     @map("salarie_id")
+  montant          Int        // en centimes
+  heure            DateTime   @default(now())
+  cleIdempotence   String     @unique @map("cle_idempotence")
+  status           String     @default("APPROVED") // APPROVED / REFUSED
+
+  partenaire Partenaire @relation(fields: [partenaireId], references: [id])
+  salarie    Salarie    @relation(fields: [salarieId], references: [id])
+
+  @@map("transaction")
+}
+
+model DecisionPartenaire {
+  id           String     @id @default(uuid())
+  partenaireId String     @map("partenaire_id")
+  adminId      String     @map("admin_id")
+  decision     String
+  motif        String
+  date         DateTime   @default(now())
+
+  partenaire Partenaire @relation(fields: [partenaireId], references: [id])
+
+  @@map("decision partenaire")
+}
+
+model Administration {
+  id                   String @id @default(uuid())
+  adresseMail          String @unique @map("adresse_mail")
+  motDePasse           String @map("mot_de_passe")
+  historiqueAbondement String @map("historique_abondement")
+
+  @@map("administration")
+}
